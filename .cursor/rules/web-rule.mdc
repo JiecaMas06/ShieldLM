@@ -1,0 +1,4 @@
+---
+alwaysApply: true
+---
+当需要查阅Mindspore相关资料时，优先使用fetch MCP访问官网文档进行查询；如果fetch失败，改用curl进行查看。
