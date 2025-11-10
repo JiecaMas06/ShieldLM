@@ -14,14 +14,14 @@ model:
     type: QwenForCausalLM
   model_config:
     type: QwenConfig
-  # 通过内置预设名称补齐结构/默认配置
-  checkpoint_name_or_path: qwen_14b_chat
+  # 指向本地权重目录，触发从本地safetensors加载
+  checkpoint_name_or_path: ./models/Qwen-14B-Chat
 
 # 分词器：默认使用内置预设名称。完全离线时可改为本地目录
 processor:
   tokenizer:
     type: QwenTokenizer
-    pretrained_model_name_or_path: qwen_14b_chat
+    pretrained_model_name_or_path: ./models/Qwen-14B-Chat
     padding_side: left
 
 # 权重加载：指向本地 safetensors 目录，并声明格式

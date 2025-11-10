@@ -3,7 +3,8 @@ import json
 from tqdm import tqdm, trange
 import os
 import mindspore as ms
-from mindformers import AutoModelForCausalLM, AutoTokenizer, MindFormerConfig, AutoModel
+from mindformers import AutoModelForCausalLM, AutoTokenizer, MindFormerConfig, AutoModel, AutoConfig
+import importlib
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model_path', default=None, type=str, required=True)
@@ -37,7 +38,19 @@ def create_model_tokenizer():
 	# 优先使用配置文件（官方推荐：通过 YAML 配置加载模型/权重/分词器）
 	if args.config_path is not None and (args.config_path.endswith('.yaml') or args.config_path.endswith('.yml')):
 		cfg = MindFormerConfig(args.config_path)
-		# 构建模型（会根据cfg.model与顶层load_checkpoint/load_ckpt_format完成加载）
+		# 主动导入对应模型模块，确保注册表包含所需类（例如 QwenConfig / QwenForCausalLM）
+		try:
+			if args.model_base == 'qwen':
+				importlib.import_module('mindformers.models.qwen')
+			elif args.model_base == 'baichuan':
+				importlib.import_module('mindformers.models.baichuan')
+			elif args.model_base == 'internlm':
+				importlib.import_module('mindformers.models.internlm')
+			elif args.model_base == 'chatglm':
+				importlib.import_module('mindformers.models.glm')
+		except Exception:
+			pass
+		# 按 YAML 构建模型（已通过导入确保注册齐全），保持 checkpoint 路径以加载本地权重
 		model = AutoModel.from_config(args.config_path)
 		# 构建tokenizer：优先从cfg.processor.tokenizer.pretrained_model_name_or_path获取
 		tokenizer_src = None
@@ -46,14 +59,15 @@ def create_model_tokenizer():
 		except Exception:
 			pass
 		if tokenizer_src is None:
-			# 回退到显式传入或模型名
 			tokenizer_src = args.tokenizer_path if args.tokenizer_path is not None else args.model_path
-		tokenizer = AutoTokenizer.from_pretrained(tokenizer_src, padding_side='left')
+		# 仅使用本地文件，优先选取具体 tokenizer 文件路径以触发 experimental 模式，避免读取 YAML
+		tokenizer = _load_local_tokenizer(tokenizer_src)
 	else:
 		# 兼容：直接使用内置模型名或本地目录（需具备mindformers可识别的配置）
 		if args.tokenizer_path is None:
 			args.tokenizer_path = args.model_path
-		tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_path, padding_side='left')
+		tokenizer_src = args.tokenizer_path
+		tokenizer = _load_local_tokenizer(tokenizer_src)
 		model = AutoModelForCausalLM.from_pretrained(args.model_path)
 	# 生成模式
 	model.set_train(False)
@@ -63,6 +77,49 @@ def create_model_tokenizer():
 	if getattr(tokenizer, "pad_token", None) is None:
 		tokenizer.pad_token = tokenizer.eos_token
 	return model, tokenizer
+
+
+def _load_local_tokenizer(path_like):
+	# path_like 可为目录或文件；尽量传入具体文件以启用 experimental 模式并禁止联网
+	candidates = []
+	if path_like and os.path.isdir(str(path_like)):
+		base = str(path_like)
+		for name in (
+			"tokenizer.json",
+			"tokenizer_config.json",  # 显式支持：仅有该文件也走 experimental 模式
+			"tokenizer.model",
+			"spiece.model",
+			"sentencepiece.bpe.model",
+			"vocab.json",
+			"merges.txt",
+			"qwen.tiktoken"
+		):
+			fp = os.path.join(base, name)
+			if os.path.exists(fp):
+				candidates.append(fp)
+		# 若找不到单文件，则仍使用目录，但会尝试 use_legacy=False + local_files_only
+		if not candidates:
+			candidates.append(base)
+	else:
+		candidates.append(str(path_like))
+
+	last_err = None
+	for cand in candidates:
+		try:
+			if os.path.isdir(cand):
+				# 目录：禁止 legacy，强制只读本地
+				return AutoTokenizer.from_pretrained(cand, padding_side='left', use_legacy=False, local_files_only=True)
+			# 文件：传具体文件路径，触发 experimental 模式，且只读本地
+			return AutoTokenizer.from_pretrained(cand, padding_side='left', use_legacy=False, local_files_only=True)
+		except Exception as err:
+			last_err = err
+			continue
+
+	raise RuntimeError(
+		f"未能从本地加载分词器，请确保目录或文件存在完整资产（优先需要 tokenizer.json）。\n"
+		f"尝试路径: {path_like}\n"
+		f"最后错误: {last_err}"
+	)
 
 
 def create_ipt(query, response, lang, model_base, rules=None):

@@ -16,16 +16,16 @@ python infer_shieldlm.py ...
 
 ### 1.2 模型准备
 
-可选A：直接使用 mindformers 预训练名（推荐快速验证）
-- Qwen-14B-Chat：`--model_path qwen_14b_chat`
-- Baichuan2-13B-Chat：`--model_path baichuan2_13b_chat`
+仅使用“离线本地目录”方案（不依赖MindFormers内置配置与远端资源）：
+- 准备目录：`./models/Qwen-14B-Chat`
+- 安装并用 ModelScope 下载（或手动放入本地同等文件）：
+  - `pip install modelscope`
+  - `modelscope download --model Qwen/Qwen-14B-Chat --local_dir ./models/Qwen-14B-Chat`
+- 目录内需包含：
+  - safetensors 权重（例如多个 `.safetensors` 分片）
+  - 本地分词器文件（至少其一，优先 `tokenizer.json`；若无，则可用 `tokenizer_config.json`、`spiece.model`/`sentencepiece.bpe.model`、`vocab.json`+`merges.txt`、或发行版提供的 `qwen.tiktoken` 等）
 
-可选B：使用 ModelScope 预下载本地模型目录
-- mkdir -p ./models
-- 安装modelscope：pip install modelscope
-- 下载Qwen：modelscope download --model Qwen/Qwen-14B-Chat --local_dir ./models/Qwen-14B-Chat
-- 下载Baichuan2：modelscope download --model baichuan-inc/Baichuan2-13B-Chat --local_dir ./models/Baichuan2-13B-Chat
-- 备注：若本地HF目录无法被 mindformers 直接读取，建议优先使用“可选A”的预训练名进行验证。
+注意：本项目推理严格走“本地文件加载”，不会访问 `modelers.cn` 或其它远端地址。
 
 ### 1.3 数据准备
 
@@ -44,50 +44,17 @@ python infer_shieldlm.py ...
 
 以下命令在Ascend设备下运行，脚本会自动设置MindSpore上下文（GRAPH_MODE, Ascend）。
 
-Qwen-14B-Chat（中文）：
+使用本地ModelScope目录（Qwen-14B-Chat，中文，离线）：
 
 ```bash
-python infer_shieldlm.py \
-  --model_path qwen_14b_chat \
-  --lang zh \
-  --model_base qwen \
-  --input_path ./test.jsonl \
-  --output_path ./test_out.jsonl \
-  --batch_size 2
-```
-
-Baichuan2-13B-Chat（中文）：
-
-```bash
-python infer_shieldlm.py \
-  --model_path baichuan2_13b_chat \
-  --lang zh \
-  --model_base baichuan \
-  --input_path ./test.jsonl \
-  --output_path ./test_out.jsonl \
-  --batch_size 2
-```
-
-使用本地ModelScope目录（如Qwen）：
-
-```bash
-# 方式一：使用safetensors专用YAML（推荐，使用 --config_path 指定 YAML）
 python infer_shieldlm.py \
   --config_path ./models/qwen_14b_chat_safetensors.yaml \
   --model_path ./models/Qwen-14B-Chat \
+  --tokenizer_path ./models/Qwen-14B-Chat/tokenizer_config.json \ 
   --lang zh \
   --model_base qwen \
   --input_path ./test.jsonl \
   --output_path ./test_out.jsonl
-
-# 方式二：直接指向本地HF目录（不推荐，需完整mindformers YAML/配置支持，易报experimental错误）
-# python infer_shieldlm.py \
-#   --model_path ./models/Qwen-14B-Chat \
-#   --tokenizer_path ./models/Qwen-14B-Chat \
-#   --lang zh \
-#   --model_base qwen \
-#   --input_path ./test.jsonl \
-#   --output_path ./test_out.jsonl
 ```
 
 （可选）启用规则文件：
