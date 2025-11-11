@@ -20,6 +20,7 @@ python infer_shieldlm.py ...
 - 准备目录：`./models/Qwen-14B-Chat`
 - 安装并用 ModelScope 下载（或手动放入本地同等文件）：
   - `pip install modelscope`
+  - `modelscope download --model baichuan-inc/Baichuan2-13B-Chat --local_dir ./models/Baichuan2-13B-Chat`
   - `modelscope download --model Qwen/Qwen-14B-Chat --local_dir ./models/Qwen-14B-Chat`
   - `modelscope download --model Qwen/Qwen3-14B --local_dir ./models/Qwen3-14B`
 - 目录内需包含：
@@ -51,3 +52,5 @@ python infer_shieldlm.py ...
 先更改hf文件夹中的generation_config.json文件，将max_new_tokens设置为1024。
 再运行以下命令，即可实现推理输出：
 python run_mindformers.py --config predict_qwen3.yaml --run_mode predict --use_parallel False --input_jsonl ./test.jsonl --output_jsonl ./output.jsonl --lang zh  --predict_batch_size 2 --model_base qwen
+
+建议不使用旧的Qwen-14B-Chat模型，其配置兼容性差。
