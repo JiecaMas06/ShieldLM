@@ -21,6 +21,7 @@ python infer_shieldlm.py ...
 - 安装并用 ModelScope 下载（或手动放入本地同等文件）：
   - `pip install modelscope`
   - `modelscope download --model Qwen/Qwen-14B-Chat --local_dir ./models/Qwen-14B-Chat`
+  - `modelscope download --model Qwen/Qwen3-14B --local_dir ./models/Qwen3-14B`
 - 目录内需包含：
   - safetensors 权重（例如多个 `.safetensors` 分片）
   - 本地分词器文件（至少其一，优先 `tokenizer.json`；若无，则可用 `tokenizer_config.json`、`spiece.model`/`sentencepiece.bpe.model`、`vocab.json`+`merges.txt`、或发行版提供的 `qwen.tiktoken` 等）
@@ -46,29 +47,7 @@ python infer_shieldlm.py ...
 
 使用本地ModelScope目录（Qwen-14B-Chat，中文，离线）：
 
-```bash
-python infer_shieldlm.py \
-  --config_path ./models/qwen_14b_chat_safetensors.yaml \
-  --model_path ./models/Qwen-14B-Chat \
-  --tokenizer_path ./models/Qwen-14B-Chat/tokenizer_config.json \ 
-  --lang zh \
-  --model_base qwen \
-  --input_path ./test.jsonl \
-  --output_path ./test_out.jsonl
-```
-
-（可选）启用规则文件：
-
-```bash
-python infer_shieldlm.py \
-  --model_path qwen_14b_chat \
-  --lang zh \
-  --model_base qwen \
-  --input_path ./test.jsonl \
-  --output_path ./test_out.jsonl \
-  --rule_path ./rules.txt
-```
-
-输出文件 `test_out.jsonl` 将在原始对象基础上新增字段 `output`，为模型对给定对话的安全性分析结果。建议抽样打开若干行验证生成格式是否符合：
-- 开头包含“[答案] … / [分析] …”（中文）或 “[Answer] … / [Analysis] …”（英文）
-- 与所选 `model_base` 的提示模板一致（Qwen/Baichuan/InternLM/ChatGLM）
+以自带配置的Qwen3-14B模型为例：
+先更改hf文件夹中的generation_config.json文件，将max_new_tokens设置为1024。
+再运行以下命令，即可实现推理输出：
+python run_mindformers.py --config predict_qwen3.yaml --run_mode predict --use_parallel False --input_jsonl ./test.jsonl --output_jsonl ./output.jsonl --lang zh  --predict_batch_size 2 --model_base qwen
