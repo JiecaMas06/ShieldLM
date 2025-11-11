@@ -1,3 +1,5 @@
 torch==2.0.1
 tqdm==4.65.0
 transformers==4.36.2
+
+python run_mindformers.py --config ./configs/predict_qwen_14b.yaml --run_mode predict --device_target Ascend --load_checkpoint ./models/qwen.ckpt --shield_input_path ./test.jsonl --shield_output_path ./test_out.jsonl --shield_lang zh --shield_model_base qwen --predict_batch_size 4
