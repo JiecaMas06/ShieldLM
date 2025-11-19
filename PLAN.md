@@ -9,3 +9,7 @@ Mindspore Transformers1.7.0（mindformers）https://www.mindspore.cn/mindformers
 ## 阶段目标实现
 
 ### 第一阶段：完成infer_shieldlm.py的迁移，并完成测试，确认模型基本生成功能。
+
+[ ] 测试Qwen3-14B的推理功能呢
+[ ] 测试Baichuan2-13B的推理功能呢
+

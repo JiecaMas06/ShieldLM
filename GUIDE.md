@@ -17,11 +17,9 @@ python infer_shieldlm.py ...
 ### 1.2 模型准备
 
 仅使用“离线本地目录”方案（不依赖MindFormers内置配置与远端资源）：
-- 准备目录：`./models/Qwen-14B-Chat`
+- 准备目录：`./models/Qwen3-14B`
 - 安装并用 ModelScope 下载（或手动放入本地同等文件）：
   - `pip install modelscope`
-  - `modelscope download --model baichuan-inc/Baichuan2-13B-Chat --local_dir ./models/Baichuan2-13B-Chat`
-  - `modelscope download --model Qwen/Qwen-14B-Chat --local_dir ./models/Qwen-14B-Chat`
   - `modelscope download --model Qwen/Qwen3-14B --local_dir ./models/Qwen3-14B`
 - 目录内需包含：
   - safetensors 权重（例如多个 `.safetensors` 分片）
@@ -45,7 +43,7 @@ python infer_shieldlm.py ...
 ## 2. 测试infer_shieldlm.py
 
 以下命令在Ascend设备下运行，脚本会自动设置MindSpore上下文（GRAPH_MODE, Ascend）。
-
+先上传run_mindformers.py文件到jupyter环境中。
 使用本地ModelScope目录（Qwen-14B-Chat，中文，离线）：
 
 以自带配置的Qwen3-14B模型为例：
@@ -54,3 +52,8 @@ python infer_shieldlm.py ...
 python run_mindformers.py --config predict_qwen3.yaml --run_mode predict --use_parallel False --input_jsonl ./test.jsonl --output_jsonl ./output.jsonl --lang zh  --predict_batch_size 2 --model_base qwen
 
 建议不使用旧的Qwen-14B-Chat模型，其配置兼容性差。
+
+使用Baichuan2-13B模型：（同样不建议使用Baichuan2模型，兼容性差，可以考虑更换为最新的glm4系列模型。）
+
+## 3.测试get_probability功能
+
