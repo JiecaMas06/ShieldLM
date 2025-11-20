@@ -55,5 +55,55 @@ python run_mindformers.py --config predict_qwen3.yaml --run_mode predict --use_p
 
 使用Baichuan2-13B模型：（同样不建议使用Baichuan2模型，兼容性差，可以考虑更换为最新的glm4系列模型。）
 
-## 3.测试get_probability功能
+## 3. 测试get_probability功能
+
+`get_probability_ms.py` 用于计算模型对输入文本安全性评估的概率分布（safe/unsafe/controversial）。
+
+### 3.1 基本用法
+
+使用 Qwen3-14B 模型计算概率（中文）：
+
+```bash
+python get_probability_ms.py \
+  --model_path ./models/Qwen3-14B \
+  --config_path ./models/predict_qwen3.yaml \
+  --input_path ./test.jsonl \
+  --output_path ./output_prob.jsonl \
+  --lang zh \
+  --model_base qwen
+```
+
+### 3.2 参数说明
+
+- `--model_path`：模型权重目录（必需）
+- `--tokenizer_path`：分词器路径（可选，默认使用 model_path）
+- `--config_path`：MindFormers YAML 配置文件（可选）
+- `--input_path`：输入 JSONL 文件，包含 `query` 和 `response` 字段
+- `--output_path`：输出 JSONL 文件，会添加 `prob` 字段
+- `--lang`：语言，`zh` 或 `en`（必需）
+- `--model_base`：模型类型，可选 `qwen`、`baichuan`、`internlm`、`chatglm`（必需）
+- `--rule_path`：自定义规则文件（可选）
+
+### 3.3 输出格式
+
+输出文件会在原有字段基础上添加 `prob` 字段，包含三个概率值：
+
+```json
+{"query": "...", "response": "...", "prob": {"safe": 0.85, "unsafe": 0.10, "controversial": 0.05}}
+```
+
+### 3.4 使用自定义规则
+
+如需在评估时注入自定义规则，可通过 `--rule_path` 指定规则文件：
+
+```bash
+python get_probability_ms.py \
+  --model_path ./models/Qwen3-14B \
+  --config_path ./models/predict_qwen3.yaml \
+  --input_path ./test.jsonl \
+  --output_path ./output_prob.jsonl \
+  --lang zh \
+  --model_base qwen \
+  --rule_path ./rules.txt
+```
 
