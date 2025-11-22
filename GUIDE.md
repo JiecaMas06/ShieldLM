@@ -47,7 +47,7 @@ python infer_shieldlm.py ...
 使用本地ModelScope目录（Qwen-14B-Chat，中文，离线）：
 
 以自带配置的Qwen3-14B模型为例：
-先更改hf文件夹中的generation_config.json文件，将max_new_tokens设置为1024。
+**先更改hf文件夹中的generation_config.json文件，将max_new_tokens设置为1024。**
 再运行以下命令，即可实现推理输出：
 python run_mindformers.py --config predict_qwen3.yaml --run_mode predict --use_parallel False --input_jsonl ./test.jsonl --output_jsonl ./output.jsonl --lang zh  --predict_batch_size 2 --model_base qwen
 
