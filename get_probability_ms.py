@@ -7,7 +7,9 @@ import numpy as np
 from tqdm import trange
 
 from mindformers import AutoModelForCausalLM, AutoTokenizer, MindFormerConfig, AutoModel
+from mindformers.core.context import build_context
 from mindformers.generation import GenerationConfig
+from mindformers.tools.register import MindFormerRegister
 import importlib
 
 
@@ -62,68 +64,80 @@ def create_ipt(query: str, response: str, lang: str, model_base: str, rules: Opt
 
 
 def _load_local_tokenizer(path_like: str):
-    candidates: List[str] = []
-    if path_like and os.path.isdir(str(path_like)):
-        base = str(path_like)
-        for name in (
-            "tokenizer.json",
-            "tokenizer_config.json",
-            "tokenizer.model",
-            "spiece.model",
-            "sentencepiece.bpe.model",
-            "vocab.json",
-            "merges.txt",
-            "qwen.tiktoken"
-        ):
-            fp = os.path.join(base, name)
-            if os.path.exists(fp):
-                candidates.append(fp)
-        if not candidates:
-            candidates.append(base)
-    else:
-        candidates.append(str(path_like))
+    base = str(path_like)
+    if os.path.isfile(base):
+        base = os.path.dirname(base)
 
-    last_err = None
-    for cand in candidates:
-        try:
-            if os.path.isdir(cand):
-                return AutoTokenizer.from_pretrained(cand, padding_side='left', use_legacy=False, local_files_only=True)
-            return AutoTokenizer.from_pretrained(cand, padding_side='left', use_legacy=False, local_files_only=True)
-        except Exception as err:
-            last_err = err
-            continue
-    raise RuntimeError(
-        f"未能从本地加载分词器，请确保目录或文件存在完整资产（优先需要 tokenizer.json）。\n"
-        f"尝试路径: {path_like}\n"
-        f"最后错误: {last_err}"
-    )
+    if not os.path.isdir(base):
+        raise RuntimeError(
+            f"未能从本地加载分词器，请确保目录存在且包含完整资产（优先需要 tokenizer.json）。\n"
+            f"尝试路径: {base}"
+        )
+
+    try:
+        return AutoTokenizer.from_pretrained(
+            base,
+            padding_side='left',
+            local_files_only=True,
+        )
+    except Exception as err:
+        raise RuntimeError(
+            f"未能从本地加载分词器，请确保目录包含完整资产（优先需要 tokenizer.json）。\n"
+            f"尝试路径: {base}\n"
+            f"最后错误: {err}"
+        )
 
 
 def create_model_tokenizer():
-    device_id = int(os.getenv("DEVICE_ID", "0"))
-    ms.set_context(mode=ms.GRAPH_MODE, device_target="Ascend", device_id=device_id)
-
     config_path = args.config_path
-    tokenizer_path = args.tokenizer_path or args.model_path
 
     if config_path and (config_path.endswith('.yaml') or config_path.endswith('.yml')):
-        _ = MindFormerConfig(config_path)
+        cfg = MindFormerConfig(config_path, run_mode='predict')
+        device_id_str = os.getenv("DEVICE_ID", None)
+        if device_id_str is not None:
+            try:
+                cfg.context.device_id = int(device_id_str)
+            except Exception:
+                pass
+        build_context(cfg)
+
         try:
             if args.model_base == 'qwen':
                 importlib.import_module('mindformers.models.qwen')
             elif args.model_base == 'baichuan':
-                importlib.import_module('mindformers.models.baichuan')
+                importlib.import_module('ext.baichuan2_hf.register')
             elif args.model_base == 'internlm':
                 importlib.import_module('mindformers.models.internlm')
             elif args.model_base == 'chatglm':
                 importlib.import_module('mindformers.models.glm')
         except Exception:
             pass
-        model = AutoModel.from_config(config_path)
-    else:
-        model = AutoModelForCausalLM.from_pretrained(args.model_path)
 
-    tokenizer = _load_local_tokenizer(tokenizer_path)
+        model = AutoModel.from_config(config_path)
+
+        if hasattr(cfg, 'processor') and hasattr(cfg.processor, 'tokenizer'):
+            tokenizer = MindFormerRegister.get_instance_from_cfg(
+                cfg.processor.tokenizer, 'tokenizer'
+            )
+        else:
+            tokenizer_path = args.tokenizer_path
+            if tokenizer_path is None:
+                pretrained_dir = None
+                if hasattr(cfg, "model") and hasattr(cfg.model, "model_config"):
+                    pretrained_dir = getattr(cfg.model.model_config, "pretrained_model_dir", None)
+                if pretrained_dir is None:
+                    pretrained_dir = getattr(cfg, "pretrained_model_dir", None)
+                if pretrained_dir is not None:
+                    tokenizer_path = pretrained_dir
+                else:
+                    tokenizer_path = args.model_path
+            tokenizer = _load_local_tokenizer(tokenizer_path)
+    else:
+        device_id = int(os.getenv("DEVICE_ID", "0"))
+        ms.set_context(mode=ms.GRAPH_MODE, device_target="Ascend", device_id=device_id)
+        tokenizer_path = args.tokenizer_path or args.model_path
+        model = AutoModelForCausalLM.from_pretrained(args.model_path)
+        tokenizer = _load_local_tokenizer(tokenizer_path)
     model.set_train(False)
     if getattr(tokenizer, "eos_token", None) is None:
         tokenizer.eos_token = '<|endoftext|>'

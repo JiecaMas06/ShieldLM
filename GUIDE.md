@@ -61,35 +61,38 @@ python run_mindformers.py --config predict_qwen3.yaml --run_mode predict --use_p
 
 ### 3.1 基本用法
 
-使用 Qwen3-14B 模型计算概率（中文）：
+使用 Qwen3-14B 模型计算概率（中文），推荐显式指定与 `run_mindformers.py` 相同的 YAML：
 
 ```bash
 python get_probability_ms.py \
   --model_path ./models/Qwen3-14B \
-  --config_path ./models/predict_qwen3.yaml \
-  --input_path ./test.jsonl \
-  --output_path ./output_prob.jsonl \
+  --config_path ./predict_qwen3.yaml \
   --lang zh \
-  --model_base qwen
+  --model_base qwen \
+  --batch_size 1
 ```
+
+脚本会对内置示例 `(query, response)` 做一次推理，并在终端打印模型生成结果和三类概率。
 
 ### 3.2 参数说明
 
-- `--model_path`：模型权重目录（必需）
-- `--tokenizer_path`：分词器路径（可选，默认使用 model_path）
-- `--config_path`：MindFormers YAML 配置文件（可选）
-- `--input_path`：输入 JSONL 文件，包含 `query` 和 `response` 字段
-- `--output_path`：输出 JSONL 文件，会添加 `prob` 字段
+- `--model_path`：模型权重目录（必需），用于兜底加载以及定位本地 tokenizer 资产
+- `--tokenizer_path`：分词器路径（可选），默认会优先从 YAML 中的 `pretrained_model_dir` 自动推断，若无则回退到 `model_path`
+- `--config_path`：MindFormers YAML 配置文件（强烈推荐），与 `run_mindformers.py` 使用的配置保持一致，用于通过 `MindFormerConfig + build_context + AutoModel.from_config` 加载模型
 - `--lang`：语言，`zh` 或 `en`（必需）
-- `--model_base`：模型类型，可选 `qwen`、`baichuan`、`internlm`、`chatglm`（必需）
-- `--rule_path`：自定义规则文件（可选）
+- `--model_base`：模型类型，可选 `qwen`、`baichuan`、`internlm`、`chatglm`（必需），会决定 prompt 模板及标签 token 映射
+- `--rule_path`：自定义规则文件（可选），每行一条规则，将注入到 ShieldLM 提示词中
+- `--batch_size`：推理时的 batch 大小（可选，默认 1）
 
 ### 3.3 输出格式
 
-输出文件会在原有字段基础上添加 `prob` 字段，包含三个概率值：
+当前脚本默认对内置示例 `(query, response)` 做一次推理，在终端打印两部分信息：
 
-```json
-{"query": "...", "response": "...", "prob": {"safe": 0.85, "unsafe": 0.10, "controversial": 0.05}}
+- 模型生成的完整输出文本
+- 三类标签的概率分布，例如：
+
+```text
+Predict probability:  {'safe': 0.85, 'unsafe': 0.10, 'controversial': 0.05}
 ```
 
 ### 3.4 使用自定义规则
@@ -100,8 +103,6 @@ python get_probability_ms.py \
 python get_probability_ms.py \
   --model_path ./models/Qwen3-14B \
   --config_path ./models/predict_qwen3.yaml \
-  --input_path ./test.jsonl \
-  --output_path ./output_prob.jsonl \
   --lang zh \
   --model_base qwen \
   --rule_path ./rules.txt
