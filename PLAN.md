@@ -10,6 +10,14 @@ Mindspore Transformers1.7.0（mindformers）https://www.mindspore.cn/mindformers
 
 ### 第一阶段：完成infer_shieldlm.py的迁移，并完成测试，确认模型基本生成功能。
 
-[ ] 测试Qwen3-14B的推理功能呢
-[ ] 测试Baichuan2-13B的推理功能呢
+[ ] 测试Qwen3-14B的推理功能
 
+### 第二阶段：实现get_probability_ms的迁移
+
+[ ] 测试Qwen3-14B的get_probability功能
+
+### 第三阶段：实现训练过程的迁移
+
+[ ] 测试Qwen3-14B的训练功能
+
+### 第四阶段：执行训练测试
