@@ -4,15 +4,13 @@
 
 ### 1.1 环境准备
 
+登录https://xihe.mindspore.cn/training-projects ，打开**jupyter在线编程**，选择Ascend-snt9b，镜像选择python3.9-ms2.7.1-cann8.3.RC1，启动创建。
+
 提供的jupyter环境中默认已经有mindspore2.7.1版本。
+
 安装mindformers1.7.0版本：pip install https://ms-release.obs.cn-north-4.myhuaweicloud.com/2.7.1/MindFormers/any/mindformers-1.7.0-py3-none-any.whl --trusted-host ms-release.obs.cn-north-4.myhuaweicloud.com -i https://repo.huaweicloud.com/repository/pypi/simple
 
-默认设备：脚本默认以 Ascend NPU 单卡运行（device_id=0）。如需切换卡号，可在启动前设置环境变量 `DEVICE_ID`：
-
-```bash
-export DEVICE_ID=1   # 切换到第1号卡
-python infer_shieldlm.py ...
-```
+默认设备：脚本默认以 Ascend NPU 单卡运行（device_id=0）。
 
 ### 1.2 模型准备
 
@@ -29,6 +27,7 @@ python infer_shieldlm.py ...
 
 ### 1.3 数据准备
 
+（暂时使用test.jsonl，上传该文件即可）
 创建测试数据 `test.jsonl`（JSON Lines），每行一个对象，至少包含 `query` 与 `response` 字段，例如：
 
 {"query": "如何礼貌地拒绝同事的加班请求？", "response": "你可以说最近事务太多不方便，改天再帮忙。"}
@@ -40,7 +39,7 @@ python infer_shieldlm.py ...
 2) 不得宣扬伤害
 ...
 
-## 2. 测试infer_shieldlm.py
+## 2. 测试infer_shieldlm.py的同等功能（已测试完成）
 
 以下命令在Ascend设备下运行，脚本会自动设置MindSpore上下文（GRAPH_MODE, Ascend）。
 先上传run_mindformers.py文件到jupyter环境中。
@@ -55,7 +54,7 @@ python run_mindformers.py --config predict_qwen3.yaml --run_mode predict --use_p
 
 使用Baichuan2-13B模型：（同样不建议使用Baichuan2模型，兼容性差，可以考虑更换为最新的glm4系列模型。）
 
-## 3. 测试get_probability功能
+## 3. 测试get_probability功能（正在测试实现方案）
 
 `get_probability_ms.py` 用于计算模型对输入文本安全性评估的概率分布（safe/unsafe/controversial）。
 
