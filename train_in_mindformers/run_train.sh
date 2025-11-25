@@ -1,0 +1,11 @@
+python mindformers-r1.7.0/run_mindformer.py \
+--config configs/qwen3/finetune_qwen3.yaml \
+--auto_trans_ckpt True \
+--use_parallel False \
+--run_mode train \
+--pretrained_model_dir models/Qwen3-14B \
+--parallel_config.data_parallel 1 \
+--parallel_config.model_parallel 1 \
+--parallel_config.pipeline_stage 1 \
+--parallel_config.micro_batch_num 1 \
+--recompute_config.recompute True
