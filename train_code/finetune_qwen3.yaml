@@ -19,7 +19,7 @@ trainer:
 # Runner configuration
 runner_config:
   epochs: 3
-  batch_size: 12
+  batch_size: 3
   gradient_accumulation_steps: 1
 
 # Optimizer configuration
