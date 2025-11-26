@@ -5,7 +5,7 @@ import os
 
 def add_qwen_format(path, outpath):
     
-    with open(path, 'r') as f:
+    with open(path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     
     for d in data:
@@ -14,12 +14,12 @@ def add_qwen_format(path, outpath):
         d['input'] = new_ipt
         d['output'] = new_opt
     
-    with open(outpath, 'w') as f:
+    with open(outpath, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
         
 def add_baichuan2_format(path, outpath):
     
-    with open(path, 'r') as f:
+    with open(path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     
     for d in data:
@@ -28,11 +28,11 @@ def add_baichuan2_format(path, outpath):
         d['input'] = new_ipt
         d['output'] = new_opt
     
-    with open(outpath, 'w') as f:
+    with open(outpath, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
         
 def add_llama3_format(path, outpath):
-    with open(path, 'r') as f:
+    with open(path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     
     for d in data:
@@ -41,12 +41,12 @@ def add_llama3_format(path, outpath):
         d['input'] = new_ipt
         d['output'] = new_opt
     
-    with open(outpath, 'w') as f:
+    with open(outpath, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
         
 def add_mistral_format(path, outpath):
     
-    with open(path, 'r') as f:
+    with open(path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     
     for d in data:
@@ -55,12 +55,12 @@ def add_mistral_format(path, outpath):
         d['input'] = new_ipt
         d['output'] = new_opt
     
-    with open(outpath, 'w') as f:
+    with open(outpath, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
         
 def add_chatglm3_format(path, outpath):
     
-    with open(path, 'r') as f:
+    with open(path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     
     for d in data:
@@ -69,7 +69,7 @@ def add_chatglm3_format(path, outpath):
         d['input'] = new_ipt
         d['output'] = new_opt
     
-    with open(outpath, 'w') as f:
+    with open(outpath, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
         
 def add_internlm2_format(path, outpath):
@@ -78,7 +78,7 @@ def add_internlm2_format(path, outpath):
         
 def change_label_first(path, outpath):
     # Change [Analysis] ... [Answer] to [Answer] ... [Analysis]
-    with open(path, 'r') as f:
+    with open(path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     
     for d in data:
@@ -100,11 +100,11 @@ def change_label_first(path, outpath):
         d['output'] = opt
     
     print(f'Finish constructing {len(data)} samples')
-    with open(outpath, 'w') as f:
+    with open(outpath, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
         
 def combine_rules(path, outpath):
-    with open(path, 'r') as f:
+    with open(path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     
     zh_controversialtype_rules = {}
@@ -204,7 +204,7 @@ def combine_rules(path, outpath):
                     new_opt = d['output'].replace('规则1', f'规则{used_rule_number}')
                     d['output'] = new_opt
                 
-    with open(outpath, 'w') as f:
+    with open(outpath, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 if __name__ == '__main__':
