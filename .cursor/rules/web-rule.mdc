@@ -1,4 +1,28 @@
 ---
 alwaysApply: true
 ---
-当需要查阅Mindspore相关资料时，优先使用fetch MCP访问官网文档进行查询；如果fetch失败，改用curl进行查看。
+# 网络查询规则
+
+当需要查阅 MindSpore 相关资料时：
+
+## 查询优先级
+1. **优先使用 fetch MCP** 访问官网文档进行查询
+2. 如果 fetch 失败，**改用 curl** 进行查看
+3. 如需更多信息，可使用 **brave search** 进行搜索
+
+## 主要参考文档
+
+### MindSpore 2.4.10
+- https://www.mindspore.cn/docs/zh-CN/r2.4.10/index.html
+
+### MindFormers 1.3.2
+| 功能 | 文档链接 |
+|------|----------|
+| 推理 | https://www.mindspore.cn/mindformers/docs/zh-CN/r1.3.2/usage/inference.html |
+| SFT微调 | https://www.mindspore.cn/mindformers/docs/zh-CN/r1.3.2/usage/sft_tuning.html |
+| 参数高效微调 | https://www.mindspore.cn/mindformers/docs/zh-CN/r1.3.2/usage/parameter_efficient_fine_tune.html |
+| 权重转换 | https://www.mindspore.cn/mindformers/docs/zh-CN/r1.3.2/function/weight_conversion.html |
+| 开发迁移 | https://www.mindspore.cn/mindformers/docs/zh-CN/r1.3.2/usage/dev_migration.html |
+| API总览 | https://www.mindspore.cn/mindformers/docs/zh-CN/r1.3.2/mindformers.html |
+| Generation API | https://www.mindspore.cn/mindformers/docs/zh-CN/r1.3.2/mindformers.generation.html |
+| Models API | https://www.mindspore.cn/mindformers/docs/zh-CN/r1.3.2/mindformers.models.html |
