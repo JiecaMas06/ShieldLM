@@ -47,7 +47,7 @@ train_dataset: &train_dataset
     # datasets load arguments
     load_func: 'load_dataset'
     path: "json"
-    data_files: 'train_code/sft_data/combine_rules_qwen_format_label_first/train_final.jsonl'
+    data_files: 'datasets/train_final.jsonl'
     split: "train"
 
     # MindFormers dataset arguments
