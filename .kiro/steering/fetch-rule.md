@@ -1,0 +1,8 @@
+---
+inclusion: always
+---
+本项目涉及到：
+Mindspore2.4.10： https://www.mindspore.cn/docs/zh-CN/r2.4.10/index.html
+Mindspore Transformers（mindformers）1.3.2：https://www.mindspore.cn/mindformers/docs/zh-CN/r1.3.2/index.html
+
+当需要使用相关接口时，优先使用fetch mcp查看官网说明，如果fetch失败，则采用curl查看官网说明
