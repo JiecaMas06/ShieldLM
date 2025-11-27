@@ -120,7 +120,12 @@ python get_probability_ms.py \
 
 ### 训练
 
-直接使用 train_in_mindformers/run_train.sh
+上传整个mindformers.zip 
+在config/qwen3文件夹下把 train_code/finetune_qwen3.yaml文件上传并替换
+
+把 train_in_mindformers/run_train.sh 文件传到解压缩完的mindformers文件夹下
+
+然后bash run_train.sh
 
 
 
