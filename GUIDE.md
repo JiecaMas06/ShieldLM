@@ -107,3 +107,21 @@ python get_probability_ms.py \
   --rule_path ./rules.txt
 ```
 
+
+
+
+
+## 4. 微调训练
+### 数据准备
+
+来自train_code/sft_data/combine_rules_qwen_format_label_first/train_final.jsonl的数据（理论上同名的.json 文件也是一样的，但有时候.json莫名其妙用不了）
+
+上传之后把它放在新建的datasets文件夹下
+
+### 训练
+
+直接使用 train_in_mindformers/run_train.sh
+
+
+
+
